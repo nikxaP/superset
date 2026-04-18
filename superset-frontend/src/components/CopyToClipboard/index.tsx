@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { cloneElement, ReactElement, useCallback } from 'react';
+import { cloneElement, isValidElement, ReactElement, useCallback } from 'react';
 import { t } from '@apache-superset/core/translation';
 import { css, SupersetTheme } from '@apache-superset/core/theme';
 import copyTextToClipboard from 'src/utils/copy';
@@ -66,14 +66,19 @@ function CopyToClip({
     }
   }, [getText, text, copyToClipboard]);
 
-  const getDecoratedCopyNode = useCallback(
-    () =>
-      cloneElement(copyNode as ReactElement, {
+  const getDecoratedCopyNode = useCallback(() => {
+    if (isValidElement(copyNode)) {
+      return cloneElement(copyNode as ReactElement, {
         style: { cursor: 'pointer' },
         onClick,
-      }),
-    [copyNode, onClick],
-  );
+      });
+    }
+    return (
+      <span style={{ cursor: 'pointer' }} onClick={onClick} role="button">
+        {copyNode}
+      </span>
+    );
+  }, [copyNode, onClick]);
 
   const renderTooltip = useCallback(
     (cursor: string) => (
